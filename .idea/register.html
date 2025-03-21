@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sistema de Horas Extraordinarias | Login</title>
+    <title>Sistema Interno de Horas Extraordinarias</title>
     <style>
         *{
             padding: 0;
@@ -52,7 +52,7 @@
             margin-top: 10px;
         }
 
-        input[type="email"], input[type="password"] {
+        input[type="email"], input[type="password"], input[type="text"] {
             padding: 10px;
             margin: 5px 0;
             font-size: 14px;
@@ -61,7 +61,7 @@
             border-radius: 7px;
         }
 
-        input[type="email"]:focus, input[type="password"]:focus {
+        input[type="email"]:focus, input[type="password"]:focus, input[type="text"]:focus {
             border-color: rgb(31 41 55);
             outline: none;
             font-size: 14px;
@@ -144,14 +144,17 @@
         <div class="container">
             <img class="logo" src="https://media-hosting.imagekit.io//96420c82b0384d88/LOGO.png?Expires=1837170271&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=xbWN-5mBvfnZiGL9w66RLLf7ota2fIw4s-F37RIWUN898ay7-bGL4zY2wB21FKKtYjIV12pxj4T9dsW-ZqCEicLuyEBQjsBtFOCA0o6INzQ51RXysKis3K3iNFl4yD3hgEQufe2bUBly08qJ0tWwziWp5d1QH93AwvSDyAC91Q3JKNZOA1bCANAJInxW211Quy5SLOvxObtt7dRlVbbejST1-M1rlrpA23QWNZ7bo5nGn1ZZzXy~XkSW3RajZd1mw-s6Vb6F2Bn~fjg0yHxzsTqmV09Nxni1lHzDopOQw1tAVNTPpT3iP3YHALng98z2nge0RQn-vWUtgP9LmI-IAw__">
         </div>
+        <label for="usuario">Nombre completo</label>
+        <input type="text" name="usuario" id="usuario">
         <label for="email">Email</label>
         <input type="email" name="email" id="email">
         <label for="password">Contraseña</label>
         <input type="password" name="password" id="password">
+        <label for="rpassword">Repetir contraseña</label>
+        <input type="password" name="rpassword" id="rpassword">
         <div class="refs">
-            <a>¿Olvidó su contraseña?</a>
-            <a onclick="window.location.href='register.html'">Registrarse</a>
-            <button type="button" onclick="login()">INGRESAR</button>
+            <a onclick="window.location.href='login.html'">¿Ya tiene una cuenta?</a>
+            <button type="button" onclick="login()">REGISTRARSE</button>
         </div>
     </div>
 </div>
@@ -181,58 +184,6 @@
         });
     }
 
-    function validarCampoVacioLogin(email, password) {
-        if (!email || !password) {
-            mostrarMensajeError("Por favor, complete todos los campos para poder ingresar.");
-            return true;
-        }
-        return false;
-    }
 
-    async function validarInformacionLogin(email, password, usuarios) {
-        var emails = usuarios.slice(1).map(row => row[usuarios[0].indexOf("EMAIL")]);
-        var passwords = usuarios.slice(1).map(row => row[usuarios[0].indexOf("PASSWORD")]);
-        var accesos = usuarios.slice(1).map(row => row[usuarios[0].indexOf("ACCESS")]);
-        var usuarioIndice = emails.indexOf(email);
-
-        if (usuarioIndice === -1) {
-            mostrarMensajeError("El mail ingresado no está registrado.");
-            return true;
-        }
-
-        if (passwords[usuarioIndice] !== (await hashPasswordAsync(password))) {
-            mostrarMensajeError("La contraseña es incorrecta o no se corresponde al mail ingresado.");
-            return true;
-        }
-
-        switch (accesos[usuarioIndice]) {
-            case "BASICO":
-            case "ALTO":
-            case "CENTRAL":
-                break;
-            default:
-                mostrarMensajeError("Su cuenta aún no ha sido validada. Por favor, vuelva más tarde.");
-                return true;
-        }
-
-        return false;
-    }
-
-    async function login() {
-        let email = document.getElementById("email").value;
-        let password = document.getElementById("password").value;
-
-        if (validarCampoVacioLogin(email, password)) {
-            return;
-        }
-
-        google.script.run.withSuccessHandler(async function(usuarios) {
-            if (await validarInformacionLogin(email, password, usuarios)) {
-                return;
-            }
-
-            console.log("yippieee3");
-        }).obtenerInformacionUsuarios();
-    }
 </script>
 </html>
