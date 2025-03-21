@@ -115,6 +115,25 @@
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
         }
 
+        .mensaje-exito {
+            display: none;
+            background-color: #66BB6A;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-family: Calibri;
+            font-size: 14px;
+            width: 50%;
+            max-width: 600px;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
         .close {
             color: white;
             font-size: 20px;
@@ -139,6 +158,11 @@
     <span class="close" onclick="cerrarMensajeError()">×</span>
 </div>
 
+<div id="mensajeExito" class="mensaje-exito">
+    <span id="mensajeExitoTexto"></span>
+    <span class="close" onclick="cerrarMensajeExito()">×</span>
+</div>
+
 <div class="container">
     <div class="formulario">
         <div class="container">
@@ -161,6 +185,20 @@
 </body>
 
 <script>
+    function cerrarMensajeExito() {
+        const mensajeDiv = document.getElementById("mensajeExito");
+        mensajeDiv.style.display = "none";
+    }
+
+    function mostrarMensajeExito(mensaje) {
+        const mensajeDiv = document.getElementById("mensajeExito");
+        const mensajeTexto = document.getElementById("mensajeExitoTexto");
+
+        mensajeTexto.innerText = mensaje;
+        mensajeDiv.style.display = "block";
+    }
+
+
     function cerrarMensajeError() {
         const mensajeDiv = document.getElementById("mensajeError");
         mensajeDiv.style.display = "none";
@@ -184,6 +222,53 @@
         });
     }
 
+    function validarCampoVacioRegistro(usuario, email, password, rpassword) {
+        if (!usuario || !email || !password || !rpassword) {
+            mostrarMensajeError("Por favor, complete todos los campos para poder registrarse.");
+            return true;
+        }
+        return false;
+    }
 
+    function validarPasswordRepetida(password, rpassword) {
+        if (rpassword !== password) {
+            return mostrarMensajeError("Las contraseñas ingresadas no son iguales entre sí.");
+        }
+        return false;
+    }
+
+    function validarEmailsExistentesRegistro(email, usuarios) {
+        var emails = usuarios.slice(1).map(row => row[usuarios[0].indexOf("EMAIL")]);
+
+        if (emails.includes(email)) {
+            return mostrarMensajeError("El email ingresado ya está registrado.");
+        }
+        return false;
+    }
+
+    async function register() {
+        let id = Utilities.getUuid();
+        let usuario = document.getElementById("usuario");
+        let email = document.getElementById("email");
+        let password = document.getElementById("password");
+        let rpassword = document.getElementById("rpassword");
+
+        google.script.run.withSuccessHandler(async function(result) {
+            if (validarCampoVacioRegistro(usuario, email, password, rpassword)) {
+                return;
+            }
+
+            if (validarPasswordRepetida(password, rpassword)) {
+                return;
+            }
+
+            google.script.run.withSuccessHandler(async function(usuarios) {
+                if (validarEmailsExistentesRegistro(email, usuarios)) {
+                    return;
+                }
+            }).obtenerInformacionUsuarios();
+            mostrarMensajeExito("¡El usuario ha sido registrado correctamente!");
+        }).cargarUsuarioNuevo(id, usuario, email, (await hashPasswordAsync(password)));
+    }
 </script>
 </html>
